@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.StudentMapper">
+    <cache eviction="LRU" flushInterval="100000" size="1024" readOnly="true "></cache>
+    <resultMap id="studentMap" type="po.StudentBean">
+        <id property="id" column="id"></id>
+        <result property="cname" column="学生姓名"></result>
+        <result property="sex" column="性别" javaType="enums.SexEnum" jdbcType="INTEGER"
+                typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+        <result property="note" column="备注"></result>
+        <association property="studentSelfcard" fetchType="lazy" column="id"
+                     select="mapper.StudentSelfcardMapper.findStudentSelfcardByStudentId"></association>
+        <collection property="studentLectureBeanList" fetchType="eager" column="id"
+                    select="mapper.StudentLectureMapper.findStudentLectureByStuId"></collection>
+        <discriminator javaType="int" column="性别">
+            <case value="0" resultMap="maleStudentMap"></case>
+            <case value="1" resultMap="femaleStudentMap"></case>
+        </discriminator>
+    </resultMap>
+    <resultMap id="maleStudentMap" type="po.MaleStudentBean" extends="studentMap">
+        <collection property="studentHealthMaleBeanList" fetchType="lazy"
+                    select="mapper.StudentHealthMaleMapper.findStudentHealthMaleByStuId" column="id"></collection>
+    </resultMap>
+    <resultMap id="femaleStudentMap" type="po.FemaleStudentBean" extends="studentMap">
+        <collection property="studentHealthFemaleBeanList" fetchType="lazy"
+                    select="mapper.StudentHealthFemaleMapper.findStudentHealthFemaleByStuId" column="id"></collection>
+    </resultMap>
+
+    <select id="getStudent" parameterType="int" resultMap="studentMap">
+        SELECT id,学生姓名,性别,备注 FROM 学生表 WHERE id = #{id}
+    </select>
+
+    <resultMap id="studentMap2" type="po.StudentBean">
+        <id property="id" column="id"></id>
+        <result property="cname" column="学生姓名"></result>
+        <result property="sex" column="性别" jdbcType="INTEGER" javaType="enums.SexEnum"
+                typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"></result>
+        <result property="note" column="备注"></result>
+        <association property="studentSelfcard" column="id" javaType="po.StudentSelfcardBean">
+            <result property="id" column="ssid"></result>
+            <result property="studentId" column="学生编号"></result>
+            <result property="native_" column="籍贯"></result>
+            <result property="issueDate" column="发证日期"></result>
+            <result property="endDate" column="结束日期"></result>
+            <result property="note" column="备注"></result>
+        </association>
+
+        <collection property="studentLectureBeanList" ofType="po.StudentLectureBean">
+            <result property="id" column="编号"></result>
+            <result property="studentId" column="学生编号"></result>
+            <result property="grade" column="评分"></result>
+            <result property="note" column="备注"></result>
+            <association property="lecture" column="课程编号" javaType="po.LectureBean">
+                <result property="id" column="编号"></result>
+                <result property="lectureName" column="课程名称"></result>
+                <result property="note" column="备注"></result>
+            </association>
+        </collection>
+
+        <discriminator javaType="int" column="性别">
+            <case value="0" resultMap="maleStudentMap2"></case>
+            <case value="1" resultMap="femaleStudentMap2"></case>
+        </discriminator>
+    </resultMap>
+    <resultMap id="maleStudentMap2" type="po.MaleStudentBean" extends="studentMap2">
+        <collection property="studentHealthMaleBeanList" ofType="po.StudentHealthMaleBean">
+            <id property="id" column="编号" javaType="int"></id>
+            <result property="checkDate" column="检查日期"></result>
+            <result property="heart" column="心"></result>
+            <result property="liver" column="肝"></result>
+            <result property="spleen" column="脾"></result>
+            <result property="lung" column="肺"></result>
+            <result property="kidney" column="肾"></result>
+            <result property="prostate" column="前列腺"></result>
+            <result property="note" column="备注"></result>
+        </collection>
+    </resultMap>
+    <resultMap id="femaleStudentMap2" type="po.FemaleStudentBean" extends="studentMap2">
+        <collection property="studentHealthFemaleBeanList" ofType="po.StudentHealthFemaleBean">
+            <id property="id" column="编号" javaType="int"></id>
+            <result property="checkDate" column="检查日期"></result>
+            <result property="heart" column="心"></result>
+            <result property="liver" column="肝"></result>
+            <result property="spleen" column="脾"></result>
+            <result property="lung" column="肺"></result>
+            <result property="kidney" column="肾"></result>
+            <result property="uterus" column="子宫"></result>
+            <result property="note" column="备注"></result>
+        </collection>
+    </resultMap>
+
+    <select id="findAllStudent" resultMap="studentMap2">
+        SELECT s.id,s.学生姓名,s.性别,s.备注
+        IF(s.性别 = 0, shm.编号,  shf.编号) AS hid,
+        IF(s.性别 = 0, shm.检查日期 , shf.检查日期)AS check_date,
+        IF(s.性别 = 0,shm.心,shf.心)AS heart,
+        IF(s.性别 = 0,shm.肝,shf.肝)AS liver,
+        IF(s.性别 = 0,shm.脾,shf.脾)AS spleen,
+        IF(s.性别 = 0,shm.肺,shf.肺)AS lung,
+        IF(s.性别 = 0,shm.肾,shf.肾)AS kidney,
+        IF(s.性别 = 0,shm.备注,shf.备注)AS shnote,
+        shm.前列腺,shf.子宫,
+        ss.编号 AS ssid,ss.籍贯 AS native_,
+        ss.发证日期,ss.结束日期,ss.备注 AS ssnote,
+        sl.编号 AS slid,
+        sl.课程编号,sl.评分,sl.备注 AS slnote,
+        l.课程名称,l.备注 AS lnote
+        FROM 学生表 s
+        LEFT JOIN 男性学生健康表 shm ON s.id=shm.学生编号
+        LEFT JOIN 女性健康表 shf ON s.id = shf.学生编号
+        LEFT JOIN 学生证表 ss ON s.id = ss.学生编号
+        LEFT JOIN 课程成绩表 sl ON s.id = sl.学生编号
+        LEFT JOIN 课程表 l ON sl.课程编号 = l.编号
+    </select>
+</mapper>

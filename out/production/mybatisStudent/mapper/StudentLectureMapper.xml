@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.StudentLectureMapper">
+    <resultMap id="studentLectureMapper" type="po.StudentLectureBean">
+        <id property="id" column="编号"></id>
+        <result property="studentId" column="学生编号"></result>
+        <result property="grade" column="评分"></result>
+        <result property="note" column="备注"></result>
+        <association property="lecture" column="课程编号" select="mapper.LectureMapper.getLecture"></association>
+    </resultMap>
+    <select id="findStudentLectureByStuId" parameterType="int" resultMap="studentLectureMapper">
+        SELECT 编号,学生编号,课程编号,评分,备注 FROM 课程成绩表 where 学生编号 = #{id}
+    </select>
+</mapper>

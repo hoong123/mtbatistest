@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="jdbc.properties"></properties>
+    <typeAliases>
+        <typeAlias type="po.Role" alias="role"></typeAlias>
+        <typeAlias type="po.User" alias="user"></typeAlias>
+    </typeAliases>
+    <typeHandlers>
+        <typeHandler handler="typeHandler.MyStringTypeHandler" javaType="string" jdbcType="VARCHAR"></typeHandler>
+        <typeHandler handler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="enums.Sex"></typeHandler>
+        <typeHandler handler="typeHandler.SexEnumTypeHandler" javaType="enums.Sex"></typeHandler>
+    </typeHandlers>
+    <objectFactory type="objectFactory.MyObjectFactory">
+        <property name="name" value="MyObjectFactory"></property>
+    </objectFactory>
+    <plugins>
+        <plugin interceptor="plugin.MyPlugin">
+            <property name="dbType" value="mysql"></property>
+        </plugin>
+    </plugins>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC">
+                <property name="autoCommit" value="false"></property>
+            </transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"></property>
+                <property name="url" value="${url}"></property>
+                <property name="username" value="${username}"></property>
+                <property name="password" value="${password}"></property>
+            </dataSource>
+        </environment>
+    </environments>
+    <databaseIdProvider type="databaseIdprovider.MydatabaseIdProvider">
+        <property name="SQL Server" value="sqlserver"></property>
+        <property name="MySQL" value="mysql"></property>
+        <property name="DB2" value="db2"></property>
+        <property name="Oracle" value="oracle"></property>
+    </databaseIdProvider>
+    <mappers>
+        <mapper resource="mapper/RoleMapper.xml"></mapper>
+        <mapper resource="mapper/userMapper.xml"></mapper>
+    </mappers>
+</configuration>

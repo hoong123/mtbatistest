@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.StudentHealthFemaleMapper">
+    <resultMap id="studentHealthFemaleMap" type="po.StudentHealthFemaleBean">
+        <id property="id" column="编号"></id>
+        <result property="studentId" column="学生编号"></result>
+        <result property="checkDate" column="检查日期"></result>
+        <result property="heart" column="心"></result>
+        <result property="liver" column="肝"></result>
+        <result property="spleen" column="脾"></result>
+        <result property="lung" column="肺"></result>
+        <result property="kidney" column="肾"></result>
+        <result property="uterus" column="子宫"></result>
+        <result property="note" column="备注"></result>
+    </resultMap>
+    <select id="findStudentHealthFemaleByStuId" parameterType="int" resultMap="studentHealthFemaleMap">
+        SELECT * FROM 女性健康表 WHERE 学生编号 = #{id}
+    </select>
+</mapper>

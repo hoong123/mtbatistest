@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.RoleMapper">
+    <resultMap id="roleMap" type="role">
+        <id column="id" property="id" javaType="long" jdbcType="BIGINT"></id>
+        <result column="role_name" property="roleName" javaType="string" jdbcType="VARCHAR"></result>
+        <result column="note" property="note" typeHandler="typeHandler.MyStringTypeHandler"></result>
+    </resultMap>
+    <sql id="col_columns">
+        #{prefix}.role_no,#{prefix}.role_name,#{prefix}.note
+    </sql>
+    <select id="getRole" parameterType="long" resultMap="roleMap">
+        SELECT <include refid="col_columns">
+        <property name="prefix" value="r"></property>
+    </include> FROM t_role WHERE id = #{id}
+    </select>
+    <select id="findRole" parameterType="string" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role WHERE role_name LIKE concat('%',#{roleName javaType=string,jdbcType=VARCHAR
+        ,typeHandler=typeHandler.MyStringTypeHandler},'%')
+    </select>
+    <select id="findRoles" parameterType="string" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role where 1=1
+        <if test="_parameter != null and _parameter != ''">
+            AND role_name LIKE concat('%',#{roleName},'%')
+        </if>
+    </select>
+    <select id="findRoleByMap" parameterType="map" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role WHERE role_name LIKE concat ('%',#{roleName},'%') AND note LIKE concat('%',#{note},'%')
+    </select>
+    <insert id="insertRole" parameterType="role">
+        INSERT INTO t_role(role_name,note) VALUES (#{roleName},#{note})
+    </insert>
+    <delete id="deleteRole" parameterType="long">
+        DELETE FROM t_role WHERE id=#{id}
+    </delete>
+    <select id="findRoleByAnnotation" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role where role_name LIKE concat('%',#{roleName},'%') AND note LIKE concat('%',#{note},'%')
+    </select>
+    <select id="findRoleByParms" parameterType="params.RoleParam" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role WHERE role_name LIKE concat('%',#{roleName},'%') AND note LIKE concat('%',#{note},'%')
+    </select>
+    <insert id="insertRole" parameterType="Role" useGeneratedKeys="true" keyProperty="id" databaseId="mysql">
+        INSERT INTO t_role(role_name,note)VALUES (#{roleName},#{note})
+    </insert>
+    <update id="updataRole" parameterType="role">
+        UPDATE t_role SET role_name = #{roleName},note = #{note} WHERE id = #{id}
+    </update>
+    <delete id="delete" parameterType="long">
+        DELETE from t_role where id = #{id}
+    </delete>
+    <select id="findRoles1" parameterType="role" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role WHERE 1=1
+        <choose>
+            <when test="id !=null and id !=''">
+                AND id = #{id}
+            </when>
+            <when test="roleName !=null and roleName !=''">
+                AND  role_name LIKE concat('%',#{roleName},'%')
+            </when>
+            <otherwise>
+                AND note is not NULL
+            </otherwise>
+        </choose>
+    </select>
+    <select id="findRoles2" parameterType="string" resultMap="roleMap">
+        SELECT id,role_name,note FROM t_role
+        <where>
+            <if test="_paremeter != null and _parameter !=''">
+                AND role_name LIKE concat('%',#{roleName},'%')
+            </if>
+        </where>
+    </select>
+    <select id="findRoles3" parameterType="string" resultMap="roleMap">
+        SELECT * FROM t_role
+        <trim prefix="where" prefixOverrides="and">
+            <if test="_parameter !=null and _parameter != ''">
+                AND role_name LIKE concat('%',#{rolename},'%')
+            </if>
+        </trim>
+    </select>
+    <update id="updateRole1" parameterType="role">
+        UPDATE t_role
+        <set>
+            <if test="roleName !=null and roleName !=''">
+                role_name = #{roleName},
+            </if>
+            <if test="note!=null and note != ''">
+                note = #{note}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <select id="getRoleTest" parameterType="string" resultMap="roleMap">
+        SELECT * FROM t_role
+        <if test="type = 'Y'">
+          WHERE 1=1
+        </if>
+    </select>
+    <select id="findRoles4" resultMap="roleMap">
+        <bind name="pattern_name" value="'%'+roleName+'%'"></bind>
+        <bind name="pattern_note" value="'%'+note+'%'"></bind>
+        SELECT * FROM t_role WHERE role_name LIKE #{pattern_name}
+        AND note LIKE #{pattern_note}
+    </select>
+</mapper>
